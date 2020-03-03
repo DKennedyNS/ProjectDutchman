@@ -3,7 +3,8 @@ import RPi.GPIO as GPIO
 import time
 import re
 
-def parseArduino(gpsInfo, indexOfVariable){
+
+def parseArduino(gpsInfo, indexOfVariable):
     numRegex = "\d|\."
 
     indexOfNewLine = gpsInfo.find("\r")
@@ -15,50 +16,79 @@ def parseArduino(gpsInfo, indexOfVariable){
         dataToReturn += value
     
     return dataToReturn
-}
 
-#ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Srl_Arduino_Uno_7543535303835151D012-if00',9600)
-ser=serial.Serial("/dev/ttyACM0", 9600)
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
 
-latitude = "0"
-longitude = "0"
-intendedHeading = "0"
-heading = "0"
-distance = "0"
-altitude = "0"
+def readArduino():
+    gpsArray = {"0", "0", "0", "0", "0", "0"}
+    fileTxt = open("gpsDataFromArduino.txt","a")
 
-fileTxt = open("gpsDataFromArduino.txt","a")
+    gpsArrayInitialized = false
+    while not gpsArrayInitialized:
+        count = 0
+        for data in gpsArray:
+            if data != "0":
+                count = count + 1
+            else:
+                break
 
-while True:
-    readSerial=ser.readline()
+        if count == 5:
+            gpsArrayInitialized = true
+            break
+        
+        readSerial=ser.readline()
 
-    plainGPS = str(readSerial)    
+        plainGPS = str(readSerial)    
+        
+        #!!! indOfX are checks for what the Arduino is currently sending !!!
+        # if the variable equals anything other than -1, that's the information currently being read
+        indOfLat = plainGPS.find('Lat')
+        indOfLong = plainGPS.find('Long')
+        indOfIntendedHeading = plainGPS.find('Intended')
+        indOfHeading = plainGPS.find('Heading')
+        indOfDistance = plainGPS.find('Distance')
+        indOfAltitude = plainGPS.find('Altitude')
+
+        if len(readSerial) > 0:
+            if indOfLat >= 0:
+                gpsArray[0] = parseArduino(indOfLat, plainGPS)
+            elif indOfLong >= 0:
+                gpsArray[1] = parseArduino(indOfLong, plainGPS)
+            elif indOfIntendedHeading >= 0:
+                gpsArray[2] = parseArduino(indOfIntendedHeading, plainGPS)
+            elif indOfHeading >= 0 and indOfIntendedHeading < 0:
+                gpsArray[3] = parseArduino(indOfHeading, plainGPS)
+            elif indOfDistance >= 0:
+                gpsArray[4] = parseArduino(indOfDistance, plainGPS)
+            elif indOfAltitude >= 0:
+                gpsArray[5] = parseArduino(indOfAltitude, plainGPS)
+
+    fileTxt.close()
+
+    return gpsArray
+
+
+def main():
+    ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Srl_Arduino_Uno_7543535303835151D012-if00',9600)
+    ser=serial.Serial("/dev/ttyACM0", 9600)
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
+
+    # [0] = Latitude
+    # [1] = Longitude
+    # [2] = Intended Heading
+    # [3] = Current Heading
+    # [4] = Distance
+    # [5] = Altitude
     
-    #!!! indOfX are checks for what the Arduino is currently sending !!!
-    # if the variable equals anything other than -1, that's the information currently being read
-    indOfLat = plainGPS.find('Lat')
-    indOfLong = plainGPS.find('Long')
-    indOfIntendedHeading = plainGPS.find('Intended')
-    indOfHeading = plainGPS.find('Heading')
-    indOfDistance = plainGPS.find('Distance')
-    indOfAltitude = plainGPS.find('Altitude')
+    gpsArray = readArduino()
 
-    if len(readSerial) > 1:
-        if indOfLat >= 0:
-            latitude = parseArduino(indOfLat, plainGPS)
-        elif indOfLong >= 0:
-            longitude = parseArduino(indOfLong, plainGPS)
-        elif indOfIntendedHeading >= 0:
-            intendedHeading = parseArduino(indOfIntendedHeading, plainGPS)
-        elif indOfHeading >= 0 and indOfIntendedHeading < 0:
-            heading = parseArduino(indOfHeading, plainGPS)
-        elif indOfDistance >= 0:
-            distance = parseArduino(indOfDistance, plainGPS)
-        elif indOfAltitude >= 0:
-            altitude = parseArduino(indOfAltitude, plainGPS)
+    scream()
+
+
+if __name__ == "__main__":
+    main()
+
 
 
 # OLD CODE
