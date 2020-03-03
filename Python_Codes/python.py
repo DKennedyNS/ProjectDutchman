@@ -1,11 +1,11 @@
 import serial
 import RPi.GPIO as GPIO
-import time
+#import time
 import re
+from library.flightControls import scream
 
-
-def parseArduino(gpsInfo, indexOfVariable):
-    numRegex = "\d|\."
+def parseArduino(indexOfVariable, gpsInfo):
+    numRegex = "\d|\.|-"
 
     indexOfNewLine = gpsInfo.find("\r")
     requiredLine = gpsInfo[indexOfVariable:indexOfNewLine]
@@ -16,23 +16,27 @@ def parseArduino(gpsInfo, indexOfVariable):
         dataToReturn += value
     
     return dataToReturn
+    
 
 
 def readArduino():
-    gpsArray = {"0", "0", "0", "0", "0", "0"}
+    ser = serial.Serial("/dev/ttyACM0", 9600)
+    
+    gpsArray = ["-1", "-1", "-1", "-1", "-1", "-1"]
     fileTxt = open("gpsDataFromArduino.txt","a")
 
-    gpsArrayInitialized = false
+    gpsArrayInitialized = False
     while not gpsArrayInitialized:
         count = 0
+        
         for data in gpsArray:
-            if data != "0":
+            if data != "-1":
                 count = count + 1
             else:
                 break
 
-        if count == 5:
-            gpsArrayInitialized = true
+        if count >= 5:
+            gpsArrayInitialized = True
             break
         
         readSerial=ser.readline()
@@ -68,8 +72,8 @@ def readArduino():
 
 
 def main():
-    ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Srl_Arduino_Uno_7543535303835151D012-if00',9600)
-    ser=serial.Serial("/dev/ttyACM0", 9600)
+    #ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Srl_Arduino_Uno_7543535303835151D012-if00',9600)
+    
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
@@ -80,80 +84,13 @@ def main():
     # [3] = Current Heading
     # [4] = Distance
     # [5] = Altitude
-    
     gpsArray = readArduino()
-
+    #for value in gpsArray:
+    #    print(value)
+    
+    #glider = flightControls()
+    #print(glider.aileronAngle)
     scream()
-
 
 if __name__ == "__main__":
     main()
-
-
-
-# OLD CODE
-#indOfNewLine = plainGPS.find("\r")
-            #latitude = plainGPS[indOfLat:indOfNewLine]
-            #latNum = re.findall(numRegex, latitude)
-            #latitude = ""
-            #for ele in latNum:
-            #    latitude += ele
-            #print("Latitude: ", latitude)
-            #fileTxt.write("Latitude: ", latitude)
-            #fileTxt.write('\n')
-
-            # indOfNewLine = plainGPS.find("\r")
-            # longitude = plainGPS[indOfLong:indOfNewLine]
-            # longNum = re.findall(numRegex, longitude)
-            # longitude = ""
-            # for ele in longNum:
-            #     longitude += ele
-            # print("Longitude: ", longitude)
-            # fileTxt.write("Longitude: ", longitude)
-            # fileTxt.write('\n')
-
-            # indOfNewLine = plainGPS.find("\r")
-            # intendedHeading = plainGPS[indOfIntendedHeading:indOfNewLine]
-            # intendedNum = re.findall(numRegex, intendedHeading)
-            # intendedHeading = ""
-            # for ele in intendedNum:
-            #     intendedHeading += ele
-            # print("Intended Heading: ", intendedHeading);
-            # fileTxt.write("Intended Heading: ", intendedHeading);
-            # fileTxt.write('\n')
-
-            # indOfNewLine = plainGPS.find("\r")
-            # heading = plainGPS[indOfHeading:indOfNewLine]
-            # headingNum = re.findall(numRegex, heading)
-            # heading = ""
-            # for ele in headingNum:
-            #     heading += ele
-            # print("Current Heading: ", heading)
-            # fileTxt.write("Current Heading: ", heading)
-            # fileTxt.write('\n')
-
-            # indOfNewLine = plainGPS.find("\r");
-            # distance = plainGPS[indOfDistance:indOfNewLine];
-            # distanceNum = re.findall(numRegex, distance);
-            # distance = "";
-            # for ele in distanceNum:
-            #     distance += ele;
-            # print("Distance: ", distance);
-            # fileTxt.write("Distance: ", distance);
-            # fileTxt.write('\n')
-
-            # indOfNewLine = plainGPS.find("\r");
-            # altitude = plainGPS[indOfAltitude:indOfNewLine];
-            # altitudeNum = re.findall(numRegex, altitude);
-            # altitude = "";
-            # for ele in altitudeNum:
-            #     altitude += ele;
-            # print("Altitude: ", altitude);
-            # fileTxt.write("Altitude: ", altitude);
-            # fileTxt.write('\n')
-
-#if(checkBadData >= 0):
-    #    GPIO.output(18,GPIO.LOW)
-    #else:
-    #    GPIO.output(18,GPIO.HIGH)
-    #    print("Longitude: ", longitude)
