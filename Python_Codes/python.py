@@ -2,7 +2,7 @@ import serial
 import RPi.GPIO as GPIO
 #import time
 import re
-from library.flightControls import scream
+from library.flightControls import FlightControls
 
 def parseArduino(indexOfVariable, gpsInfo):
     numRegex = "\d|\.|-"
@@ -84,13 +84,26 @@ def main():
     # [3] = Current Heading
     # [4] = Distance
     # [5] = Altitude
-    gpsArray = readArduino()
+    
+    #gpsArray = readArduino()
     #for value in gpsArray:
     #    print(value)
     
-    #glider = flightControls()
-    #print(glider.aileronAngle)
-    scream()
+    glider = FlightControls()
+    print(glider.aileronAngle)
+    intHeading = 180.545135
+    currHeading = 20
+    
+    #glider.setAngle(30.54584453293809)
+    
+    while currHeading <= 360:    
+        glider.buildPID(currHeading, intHeading)
+        glider.updatePID(currHeading)
+        
+        print("AAngle: ",glider.aileronAngle)
+        
+        currHeading += 10
+    
 
 if __name__ == "__main__":
     main()
