@@ -1,119 +1,119 @@
 import serial
 import RPi.GPIO as GPIO
-import time
+#import time
 import re
+from library.flightControls import FlightControls
 
-#ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Srl_Arduino_Uno_7543535303835151D012-if00',9600)
-ser=serial.Serial("/dev/ttyACM0", 9600)
-GPIO.setwarnings(False);
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
+def parseArduino(indexOfVariable, gpsInfo):
+    numRegex = "\d|\.|-"
 
-numRegex = "\d|\."
+    indexOfNewLine = gpsInfo.find("\r")
+    requiredLine = gpsInfo[indexOfVariable:indexOfNewLine]
+    requiredData = re.findall(numRegex, requiredLine)
 
-while True:
-    readSerial=ser.readline()
+    dataToReturn = ""
+    for value in requiredData:
+        dataToReturn += value
     
-    arData = readSerial.split()
-    #print(arData)
+    return dataToReturn
     
-    latitude = "0"
-    longitude = "0"
-    checkBadData = -1;
+
+
+def readArduino():
+    ser = serial.Serial("/dev/ttyACM0", 9600)
     
-    dataBegin = str(arData[0])
-    strEnd = ""
-    
+    gpsArray = ["-1", "-1", "-1", "-1", "-1", "-1"]
     fileTxt = open("gpsDataFromArduino.txt","a")
+
+    gpsArrayInitialized = False
+    while not gpsArrayInitialized:
+        count = 0
+        
+        for data in gpsArray:
+            if data != "-1":
+                count = count + 1
+            else:
+                break
+
+        if count >= 5:
+            gpsArrayInitialized = True
+            break
+        
+        readSerial=ser.readline()
+
+        plainGPS = str(readSerial)    
+        
+        #!!! indOfX are checks for what the Arduino is currently sending !!!
+        # if the variable equals anything other than -1, that's the information currently being read
+        indOfLat = plainGPS.find('Lat')
+        indOfLong = plainGPS.find('Long')
+        indOfIntendedHeading = plainGPS.find('Intended')
+        indOfHeading = plainGPS.find('Heading')
+        indOfDistance = plainGPS.find('Distance')
+        indOfAltitude = plainGPS.find('Altitude')
+        #the following two may be backwards.
+        indOfRoll = plainGPS.find('BigX')
+        indOfPitch = plainGPS.find('BigY')
+
+        if len(readSerial) > 0:
+            if indOfLat >= 0:
+                gpsArray[0] = parseArduino(indOfLat, plainGPS)
+            elif indOfLong >= 0:
+                gpsArray[1] = parseArduino(indOfLong, plainGPS)
+            elif indOfIntendedHeading >= 0:
+                gpsArray[2] = parseArduino(indOfIntendedHeading, plainGPS)
+            elif indOfHeading >= 0 and indOfIntendedHeading < 0:
+                gpsArray[3] = parseArduino(indOfHeading, plainGPS)
+            elif indOfDistance >= 0:
+                gpsArray[4] = parseArduino(indOfDistance, plainGPS)
+            elif indOfAltitude >= 0:
+                gpsArray[5] = parseArduino(indOfAltitude, plainGPS)
+
+    fileTxt.close()
+
+    return gpsArray
+
+
+def main():
+    #ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Srl_Arduino_Uno_7543535303835151D012-if00',9600)
     
-    plainGPS = str(readSerial)    
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
+
+    # [0] = Latitude
+    # [1] = Longitude
+    # [2] = Intended Heading
+    # [3] = Current Heading
+    # [4] = Distance
+    # [5] = Altitude
     
-    #if(indOfNewLine >= 0){
-    #fileTxt.write('\n');
-    #}
-    #fileTxt.write(plainGPS)
+    #gpsArray = readArduino()
+    #for value in gpsArray:
+    #    print(value)
     
+    glider = FlightControls()
+    print(glider.aileronAngle)
+    intHeading = 180.545135
+    currHeading = 20
     
-    indOfLat = dataBegin.find('Lat')
-    indOfLong = dataBegin.find('Long')
-    indOfIntendedHeading = dataBegin.find('Intended')
-    indOfHeading = dataBegin.find('Heading')
-    indOfDistance = dataBegin.find('Distance')
-    indOfAltitude = dataBegin.find('Altitude')
-    if len(arData) > 1:
-        if indOfLat >= 0:
-            indOfNewLine = plainGPS.find("\r")
-            latitude = plainGPS[indOfLat:indOfNewLine];
-            latNum = re.findall(numRegex, latitude);
-            
-            latitude = "";
-            for ele in latNum:
-                latitude += ele;
-            print("Latitude: ", latitude)
-            fileTxt.write("Latitude: ", latitude)
-            fileTxt.write('\n')
-        elif indOfLong >= 0:
-            indOfNewLine = plainGPS.find("\r")
-            longitude = plainGPS[indOfLong:indOfNewLine];
-            longNum = re.findall(numRegex, longitude);
-            
-            longitude = "";
-            for ele in longNum:
-                longitude += ele;
-            print("Longitude: ", longitude)
-            fileTxt.write("Longitude: ", longitude)
-            fileTxt.write('\n')
-        elif indOfIntendedHeading >= 0:
-            indOfNewLine = plainGPS.find("\r");
-            intendedHeading = plainGPS[indOfIntendedHeading:indOfNewLine];
-            intendedNum = re.findall(numRegex, intendedHeading);
-            
-            intendedHeading = "";
-            for ele in intendedNum:
-                intendedHeading += ele;
-            
-            print("Intended Heading: ", intendedHeading);
-            fileTxt.write("Intended Heading: ", intendedHeading);
-            fileTxt.write('\n')
-        elif indOfHeading >= 0 and indOfIntendedHeading < 0:
-            indOfNewLine = plainGPS.find("\r");
-            heading = plainGPS[indOfHeading:indOfNewLine];
-            headingNum = re.findall(numRegex, heading);
-            
-            heading = "";
-            for ele in headingNum:
-                heading += ele;
-                
-            print("Current Heading: ", heading);
-            fileTxt.write("Current Heading: ", heading);
-            fileTxt.write('\n')
-        elif indOfDistance >= 0:
-            indOfNewLine = plainGPS.find("\r");
-            distance = plainGPS[indOfDistance:indOfNewLine];
-            distanceNum = re.findall(numRegex, distance);
-            
-            distance = "";
-            for ele in distanceNum:
-                distance += ele;
-                
-            print("Distance: ", distance);
-            fileTxt.write("Distance: ", distance);
-            fileTxt.write('\n')
-        elif indOfAltitude >= 0:
-            indOfNewLine = plainGPS.find("\r");
-            altitude = plainGPS[indOfAltitude:indOfNewLine];
-            altitudeNum = re.findall(numRegex, altitude);
-            
-            altitude = "";
-            for ele in altitudeNum:
-                altitude += ele;
-                
-            print("Altitude: ", altitude);
-            fileTxt.write("Altitude: ", altitude);
-            fileTxt.write('\n')
-            #if(checkBadData >= 0):
-            #    GPIO.output(18,GPIO.LOW)
-            #else:
-            #    GPIO.output(18,GPIO.HIGH)
-            #    print("Longitude: ", longitude)
+    #glider.setAngle(30.54584453293809)
     
+    while currHeading <= 360:    
+        glider.buildPID(currHeading, intHeading)
+        glider.updatePID(currHeading)
+        
+        print("AAngle: ",glider.aileronAngle)
+        
+        currHeading += 10
+    
+# Calculate difference between headings to determine which aileron to raise and cause a roll.
+# Check glider current state of roll.
+# Determine best angle for turning, and raise or lower aileron to reach desired angle.
+# If accelerometer states that the glider is in desired angle for turning,
+#  don't raise aileron again.
+# Repeat this check as often as possible and keep until headings match.
+# When nearing the intended heading, raise opposite aileron to start stabilizing glider.
+#
+if __name__ == "__main__":
+    main()
