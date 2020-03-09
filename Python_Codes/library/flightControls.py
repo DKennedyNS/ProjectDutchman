@@ -36,8 +36,8 @@ class FlightControls:
     def buildPID(self,currentHDG, targetHDG):
         # Gain values for P, I and D
         Kp = 1
-        Ki = 1
-        Kd = 1
+        Ki = 0.2
+        Kd = 0.4
         
         # Polling rate of the PID controller. Determines how often new commands are sent to servo
         pollRate = 0.1

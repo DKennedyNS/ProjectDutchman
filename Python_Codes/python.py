@@ -51,6 +51,9 @@ def readArduino():
         indOfHeading = plainGPS.find('Heading')
         indOfDistance = plainGPS.find('Distance')
         indOfAltitude = plainGPS.find('Altitude')
+        #the following two may be backwards.
+        indOfRoll = plainGPS.find('BigX')
+        indOfPitch = plainGPS.find('BigY')
 
         if len(readSerial) > 0:
             if indOfLat >= 0:
@@ -104,6 +107,13 @@ def main():
         
         currHeading += 10
     
-
+# Calculate difference between headings to determine which aileron to raise and cause a roll.
+# Check glider current state of roll.
+# Determine best angle for turning, and raise or lower aileron to reach desired angle.
+# If accelerometer states that the glider is in desired angle for turning,
+#  don't raise aileron again.
+# Repeat this check as often as possible and keep until headings match.
+# When nearing the intended heading, raise opposite aileron to start stabilizing glider.
+#
 if __name__ == "__main__":
     main()
