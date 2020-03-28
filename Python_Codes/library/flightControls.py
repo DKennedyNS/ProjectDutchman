@@ -32,7 +32,7 @@ class FlightControls:
         GPIO.output(self.rightOutPin, True)
         # Break and test
         #duty = 100
-        print("Current doodie: ", duty)
+        print("Current Duty: ", duty)
         self.leftPwm.ChangeDutyCycle(duty)
         self.rightPwm.ChangeDutyCycle(duty)
         sleep(1)

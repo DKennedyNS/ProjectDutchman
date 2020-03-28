@@ -5,7 +5,7 @@ import re
 from library.flightControls import FlightControls
 
 def parseArduino(indexOfVariable, gpsInfo):
-    numRegex = "\d|\.|-"
+    numRegex = "\d|\.|[-]"
 
     indexOfNewLine = gpsInfo.find("\r")
     requiredLine = gpsInfo[indexOfVariable:indexOfNewLine]
@@ -22,7 +22,7 @@ def parseArduino(indexOfVariable, gpsInfo):
 def readArduino():
     ser = serial.Serial("/dev/ttyACM0", 9600)
     
-    gpsArray = ["-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1"]
+    gpsArray = ["0", "0", "0", "0", "0", "0", "-1", "-1"]
     fileTxt = open("gpsDataFromArduino.txt","a")
 
     gpsArrayInitialized = False
@@ -35,7 +35,7 @@ def readArduino():
             else:
                 break
 
-        if count >= 5:
+        if count > 7:
             gpsArrayInitialized = True
             break
         
@@ -54,6 +54,7 @@ def readArduino():
         #the following two may be backwards.
         indOfRoll = plainGPS.find('ROLL')
         indOfPitch = plainGPS.find('PITCH')
+
 
         if len(readSerial) > 0:
             if indOfLat >= 0:
@@ -106,19 +107,38 @@ def main():
         
         glider.setAngle(45)
         glider.setAngle(-45)
-        #if glider is pitching down, raise ailerons
-        if float(gpsArray[7]) > 30:
-            glider.setAngle(25)
-        #if glider is pitching up, lower ailerons
-        elif float(gpsArray[7]) < -30:
-            glider.setAngle(-25)
-        #if glider is rolling right, raise left aileron
-        elif float(gpsArray[6]) > 30:
-            glider.setAngle(45)
-        #if glider is rolling left, raise right aileron
-        elif float(gpsArray[6]) < -30:
-            glider.setAngle(45)
-
+        
+        accelerateFile = open("ReadAccelerometer.txt", "a")
+        toWrite = "ROLL: " + gpsArray[6] + "\nPITCH: " + gpsArray[7] + "\n"
+        accelerateFile.write(toWrite)
+        try:
+            #if glider is pitching down, raise ailerons
+            if float(gpsArray[7]) > 30:
+                #glider.setAngle(25)
+                print("Pitching Down")
+                accelerateFile.write("Pitching Down\n")
+            #if glider is pitching up, lower ailerons
+            elif float(gpsArray[7]) < -30:
+                #glider.setAngle(-25)
+                print("Pitching Up")
+                accelerateFile.write("Pitching Up\n")
+            #if glider is rolling right, raise left aileron
+            elif float(gpsArray[6]) > 30:
+                #glider.setAngle(45)
+                print("Rolling Right")
+                accelerateFile.write("Rolling Right\n")
+            #if glider is rolling left, raise right aileron
+            elif float(gpsArray[6]) < -30:
+                #glider.setAngle(45)
+                print("Rolling Left")
+                accelerateFile.write("Rolling Left\n")
+        except:
+            print("Bad Read..")
+            accelerateFile.write("Bad Read...\n")
+            
+        accelerateFile.write("\n")
+            
+        accelerateFile.close()
         #glider.setAngle(30.54584453293809)
     
     
