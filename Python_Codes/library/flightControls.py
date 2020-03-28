@@ -8,12 +8,16 @@ class FlightControls:
     GPIO.setwarnings(False)
     aileronAngle = -1
     oldAileronAngle = -1
-    outPin = 2
-    GPIO.setup(2, GPIO.OUT)
-    pwm=GPIO.PWM(outPin, 50)
+    leftOutPin = 22
+    rightOutPin = 27
+    GPIO.setup(22, GPIO.OUT)
+    GPIO.setup(27, GPIO.OUT)
+    leftPwm=GPIO.PWM(leftOutPin, 50)
+    rightPwm = GPIO.PWM(rightOutPin, 50)
     pidController = 0
     def __init__(self):
-        self.pwm.start(0)
+        self.leftPwm.start(0)
+        self.rightPwm.start(0)
 
         # Global vars for aileron angles
         self.aileronAngle = 0
@@ -24,14 +28,18 @@ class FlightControls:
     def setAngle(self, angle):
         #duty = angle / 18 + 2
         duty = (angle+90) / 18 + 2
-        GPIO.output(self.outPin, True)
+        GPIO.output(self.leftOutPin, True)
+        GPIO.output(self.rightOutPin, True)
         # Break and test
         #duty = 100
         print("Current doodie: ", duty)
-        self.pwm.ChangeDutyCycle(duty)
+        self.leftPwm.ChangeDutyCycle(duty)
+        self.rightPwm.ChangeDutyCycle(duty)
         sleep(1)
-        GPIO.output(self.outPin, False)
-        self.pwm.ChangeDutyCycle(0)
+        GPIO.output(self.leftOutPin, False)
+        GPIO.output(self.rightOutPin, False)
+        self.leftPwm.ChangeDutyCycle(0)
+        self.rightPwm.ChangeDutyCycle(0)
 
     def buildPID(self,currentHDG, targetHDG):
         # Gain values for P, I and D

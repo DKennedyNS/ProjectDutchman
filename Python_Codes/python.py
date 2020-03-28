@@ -22,7 +22,7 @@ def parseArduino(indexOfVariable, gpsInfo):
 def readArduino():
     ser = serial.Serial("/dev/ttyACM0", 9600)
     
-    gpsArray = ["-1", "-1", "-1", "-1", "-1", "-1"]
+    gpsArray = ["-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1"]
     fileTxt = open("gpsDataFromArduino.txt","a")
 
     gpsArrayInitialized = False
@@ -52,8 +52,8 @@ def readArduino():
         indOfDistance = plainGPS.find('Distance')
         indOfAltitude = plainGPS.find('Altitude')
         #the following two may be backwards.
-        indOfRoll = plainGPS.find('BigX')
-        indOfPitch = plainGPS.find('BigY')
+        indOfRoll = plainGPS.find('ROLL')
+        indOfPitch = plainGPS.find('PITCH')
 
         if len(readSerial) > 0:
             if indOfLat >= 0:
@@ -68,6 +68,11 @@ def readArduino():
                 gpsArray[4] = parseArduino(indOfDistance, plainGPS)
             elif indOfAltitude >= 0:
                 gpsArray[5] = parseArduino(indOfAltitude, plainGPS)
+            elif indOfRoll >= 0:
+                gpsArray[6] = parseArduino(indOfRoll, plainGPS)
+            elif indOfPitch >= 0:
+                gpsArray[7] = parseArduino(indOfPitch, plainGPS)
+                
 
     fileTxt.close()
 
@@ -76,36 +81,47 @@ def readArduino():
 
 def main():
     #ser = serial.Serial('/dev/serial/by-id/usb-Arduino_Srl_Arduino_Uno_7543535303835151D012-if00',9600)
-    
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
+    
+    while True:
+        # [0] = Latitude
+        # [1] = Longitude
+        # [2] = Intended Heading
+        # [3] = Current Heading
+        # [4] = Distance
+        # [5] = Altitude
+        # [6] = Roll
+        # [7] = Pitch
 
-    # [0] = Latitude
-    # [1] = Longitude
-    # [2] = Intended Heading
-    # [3] = Current Heading
-    # [4] = Distance
-    # [5] = Altitude
-    
-    #gpsArray = readArduino()
-    #for value in gpsArray:
-    #    print(value)
-    
-    glider = FlightControls()
-    print(glider.aileronAngle)
-    intHeading = 180.545135
-    currHeading = 20
-    
-    #glider.setAngle(30.54584453293809)
-    
-    while currHeading <= 360:    
-        glider.buildPID(currHeading, intHeading)
-        glider.updatePID(currHeading)
+        gpsArray = readArduino()
+        for value in gpsArray:
+            print(value)
+
+        glider = FlightControls()
+        #print(glider.aileronAngle)
+        intHeading = 180.545135
+        currHeading = 20
         
-        print("AAngle: ",glider.aileronAngle)
-        
-        currHeading += 10
+        glider.setAngle(45)
+        glider.setAngle(-45)
+        #if glider is pitching down, raise ailerons
+        if float(gpsArray[7]) > 30:
+            glider.setAngle(25)
+        #if glider is pitching up, lower ailerons
+        elif float(gpsArray[7]) < -30:
+            glider.setAngle(-25)
+        #if glider is rolling right, raise left aileron
+        elif float(gpsArray[6]) > 30:
+            glider.setAngle(45)
+        #if glider is rolling left, raise right aileron
+        elif float(gpsArray[6]) < -30:
+            glider.setAngle(45)
+
+        #glider.setAngle(30.54584453293809)
+    
+    
     
 # Calculate difference between headings to determine which aileron to raise and cause a roll.
 # Check glider current state of roll.
