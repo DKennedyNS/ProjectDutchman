@@ -8,8 +8,8 @@ class FlightControls:
     GPIO.setwarnings(False)
     aileronAngle = -1
     oldAileronAngle = -1
-    leftOutPin = 17
-    rightOutPin = 27
+    leftOutPin = 17 #left
+    rightOutPin = 27 #right
     GPIO.setup(leftOutPin, GPIO.OUT)
     GPIO.setup(rightOutPin, GPIO.OUT)
     leftPwm=GPIO.PWM(leftOutPin, 50)

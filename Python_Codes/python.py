@@ -86,6 +86,12 @@ def main():
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
     
+    aileronOneUp = 35 #for lift
+    aileronOneDown = 35 #for pitch down
+    
+    aileronTwoUp = -35 #for lift
+    aileronTwoDown = 35 #for pitch down
+    
     while True:
         # [0] = Latitude
         # [1] = Longitude
@@ -106,16 +112,11 @@ def main():
         #currHeading = 20
         
         glider.setAileronOne(0)
-        glider.setAileronTwo(0)
+        #glider.setAileronTwo(0)
         
-        glider.setAileronOne(-35)
-        glider.setAileronTwo(35)
+        glider.setAileronOne(aileronOneUp)
+        #glider.setAileronTwo(aileronTwoUp)
         
-        glider.setAileronOne(0)
-        glider.setAileronTwo(0)
-        
-        glider.setAileronOne(35)
-        glider.setAileronTwo(-35)
         
         #accelerateFile = open("ReadAccelerometer.txt", "a")
         #toWrite = "ROLL: " + gpsArray[6] + "\nPITCH: " + gpsArray[7] + "\n"
