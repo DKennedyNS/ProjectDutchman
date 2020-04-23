@@ -8,10 +8,10 @@ class FlightControls:
     GPIO.setwarnings(False)
     aileronAngle = -1
     oldAileronAngle = -1
-    leftOutPin = 22
+    leftOutPin = 17
     rightOutPin = 27
-    GPIO.setup(22, GPIO.OUT)
-    GPIO.setup(27, GPIO.OUT)
+    GPIO.setup(leftOutPin, GPIO.OUT)
+    GPIO.setup(rightOutPin, GPIO.OUT)
     leftPwm=GPIO.PWM(leftOutPin, 50)
     rightPwm = GPIO.PWM(rightOutPin, 50)
     pidController = 0
@@ -25,21 +25,43 @@ class FlightControls:
                 
 
     # Convert servo angle into a PWM duty cycle so the servo can understand it. Credit: lanc1999 on Instructables.com
-    def setAngle(self, angle):
+    def setAileronOne(self, angle):
         #duty = angle / 18 + 2
-        duty = (angle+90) / 18 + 2
+        duty1 = (angle+45) / 18 + 2
+        
         GPIO.output(self.leftOutPin, True)
-        GPIO.output(self.rightOutPin, True)
+        
         # Break and test
-        #duty = 100
-        print("Current Duty: ", duty)
-        self.leftPwm.ChangeDutyCycle(duty)
-        self.rightPwm.ChangeDutyCycle(duty)
+        
+        print("Current Duty: ", duty1)
+        self.leftPwm.ChangeDutyCycle(duty1)
+        
+        
         sleep(1)
         GPIO.output(self.leftOutPin, False)
+        
+        
+        #self.leftPwm.ChangeDutyCycle(0)
+        #self.rightPwm.ChangeDutyCycle(0)
+        
+    def setAileronTwo(self, angle):
+        #duty = angle / 18 + 2
+        
+        duty2 = (angle+55) / 18 + 2
+        
+        GPIO.output(self.rightOutPin, True)
+        # Break and test
+        
+        print("Current Duty: ", duty2)
+        
+        self.rightPwm.ChangeDutyCycle(duty2)
+        
+        sleep(1)
+        
         GPIO.output(self.rightOutPin, False)
-        self.leftPwm.ChangeDutyCycle(0)
-        self.rightPwm.ChangeDutyCycle(0)
+        
+        #self.leftPwm.ChangeDutyCycle(0)
+        #self.rightPwm.ChangeDutyCycle(0)
 
     def buildPID(self,currentHDG, targetHDG):
         # Gain values for P, I and D

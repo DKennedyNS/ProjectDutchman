@@ -96,21 +96,30 @@ def main():
         # [6] = Roll
         # [7] = Pitch
 
-        gpsArray = readArduino()
-        for value in gpsArray:
-            print(value)
+        #gpsArray = readArduino()
+        #for value in gpsArray:
+        #    print(value)
 
         glider = FlightControls()
         #print(glider.aileronAngle)
-        intHeading = 180.545135
-        currHeading = 20
+        #intHeading = 180.545135
+        #currHeading = 20
         
-        glider.setAngle(45)
-        glider.setAngle(-45)
+        glider.setAileronOne(0)
+        glider.setAileronTwo(0)
         
-        accelerateFile = open("ReadAccelerometer.txt", "a")
-        toWrite = "ROLL: " + gpsArray[6] + "\nPITCH: " + gpsArray[7] + "\n"
-        accelerateFile.write(toWrite)
+        glider.setAileronOne(-35)
+        glider.setAileronTwo(35)
+        
+        glider.setAileronOne(0)
+        glider.setAileronTwo(0)
+        
+        glider.setAileronOne(35)
+        glider.setAileronTwo(-35)
+        
+        #accelerateFile = open("ReadAccelerometer.txt", "a")
+        #toWrite = "ROLL: " + gpsArray[6] + "\nPITCH: " + gpsArray[7] + "\n"
+        #accelerateFile.write(toWrite)
         try:
             #if glider is pitching down, raise ailerons
             if float(gpsArray[7]) > 30:
@@ -134,11 +143,11 @@ def main():
                 accelerateFile.write("Rolling Left\n")
         except:
             print("Bad Read..")
-            accelerateFile.write("Bad Read...\n")
+            #accelerateFile.write("Bad Read...\n")
             
-        accelerateFile.write("\n")
+        #accelerateFile.write("\n")
             
-        accelerateFile.close()
+        #accelerateFile.close()
         #glider.setAngle(30.54584453293809)
     
     
