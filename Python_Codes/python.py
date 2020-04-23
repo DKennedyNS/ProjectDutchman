@@ -124,24 +124,40 @@ def main():
         try:
             #if glider is pitching down, raise ailerons
             if float(gpsArray[7]) > 30:
-                #glider.setAngle(25)
+                glider.setAileronOne(aileronOneUp)
+                glider.setAileronTwo(aileronTwoUp)
+                
                 print("Pitching Down")
-                accelerateFile.write("Pitching Down\n")
+                
+                #accelerateFile.write("Pitching Down\n")
             #if glider is pitching up, lower ailerons
             elif float(gpsArray[7]) < -30:
-                #glider.setAngle(-25)
+                glider.setAileronOne(aileronOneDown)
+                glider.setAileronTwo(aileronTwoDown)
+                
                 print("Pitching Up")
-                accelerateFile.write("Pitching Up\n")
+                
+                #accelerateFile.write("Pitching Up\n")
             #if glider is rolling right, raise left aileron
             elif float(gpsArray[6]) > 30:
-                #glider.setAngle(45)
+                glider.setAileronOne(aileronOneUp)
+                glider.setAileronTwo(aileronTwoDown)
+                
                 print("Rolling Right")
-                accelerateFile.write("Rolling Right\n")
+                
+                #accelerateFile.write("Rolling Right\n")
             #if glider is rolling left, raise right aileron
             elif float(gpsArray[6]) < -30:
-                #glider.setAngle(45)
+                glider.setAileronOne(aileronOneDown)
+                glider.setAileronTwo(aileronTwoUp)
+                
                 print("Rolling Left")
-                accelerateFile.write("Rolling Left\n")
+                
+                #accelerateFile.write("Rolling Left\n")
+            else:
+            #if glider is in intended state, flatten ailerons.
+                glider.setAileronOne(0)
+                glider.setAileronTwo(0)
         except:
             print("Bad Read..")
             #accelerateFile.write("Bad Read...\n")
