@@ -3,6 +3,7 @@ import RPi.GPIO as GPIO
 #import time
 import re
 from library.flightControls import FlightControls
+from time import sleep
 
 ser = serial.Serial("/dev/ttyACM0", 9600)
 
@@ -24,7 +25,7 @@ def parseArduino(indexOfVariable, gpsInfo):
 def readArduino():
     
     
-    gpsArray = ["-1", "-1"]
+    gpsArray = ["0", "0", "0", "0", "0", "0", "-1", "-1"]
     #fileTxt = open("gpsDataFromArduino.txt","a")
 
     gpsArrayInitialized = False
@@ -37,7 +38,7 @@ def readArduino():
             else:
                 break
 
-        if count > 1:
+        if count > 6:
             gpsArrayInitialized = True
             break
         
@@ -45,7 +46,7 @@ def readArduino():
         #readSerial = "PITCH 58";
 
         plainGPS = str(readSerial)
-        print(plainGPS)
+        #print(plainGPS)
         
         #!!! indOfX are checks for what the Arduino is currently sending !!!
         # if the variable equals anything other than -1, that's the information currently being read
@@ -59,11 +60,11 @@ def readArduino():
         indOfRoll = plainGPS.find('ROLL')
         indOfPitch = plainGPS.find('PITCH')
         
-        termsArray = ['ROLL','PITCH']
+        termsArray = ['Lat','Long','Intended','Heading','Distance','Altitude','ROLL','PITCH']
         
         indOfX = -1
         
-        for i in range(0,2):
+        for i in range(0,7):
             indOfX = plainGPS.find(termsArray[i])
             if indOfX > 0:
                 gpsArray[i] = parseArduino(indOfX, plainGPS)
@@ -107,7 +108,7 @@ def main():
     aileronTwoUp = -35 #for lift
     aileronTwoDown = 35 #for pitch down
     
-    print("Initializing glider state")
+   # print("Initializing glider state")
     
     gliderRollRightSense = -20
     gliderRollLeftSense = 20
@@ -115,6 +116,10 @@ def main():
     gliderPitchDownSense = 20
     
     glider = FlightControls()
+    glider.setAileronOne(0)
+    sleep(1)
+    glider.setAileronTwo(0)
+    sleep(1)
     
     
     while True:
@@ -128,15 +133,15 @@ def main():
         # [7] = Pitch
 
         gpsArray = readArduino()
-        for value in gpsArray:
-            print(value)
+        #for value in gpsArray:
+        #    print(value)
 
         
         #print(glider.aileronAngle)
         #intHeading = 180.545135
         #currHeading = 20
         
-        glider.setAileronOne(0)
+       # glider.setAileronOne(0)
         #glider.setAileronTwo(0)
         
         #glider.setAileronOne(aileronOneUp)
@@ -169,7 +174,7 @@ def main():
                 glider.setAileronTwo(aileronTwoDown)
                 
                 print("Rolling Right")
-                print(gpsArray[0])
+                #print(gpsArray[0])
                 #accelerateFile.write("Rolling Right\n")
             #if glider is rolling left, raise right aileron
             elif float(gpsArray[0]) > gliderRollLeftSense:
