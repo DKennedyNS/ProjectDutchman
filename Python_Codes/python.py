@@ -103,7 +103,7 @@ def main():
     GPIO.setup(18,GPIO.OUT, initial= GPIO.LOW)
     
     aileronOneUp = 35 #for lift
-    aileronOneDown = 35 #for pitch down
+    aileronOneDown = -35 #for pitch down
     
     aileronTwoUp = -35 #for lift
     aileronTwoDown = 35 #for pitch down
@@ -112,8 +112,8 @@ def main():
     
     gliderRollRightSense = -20
     gliderRollLeftSense = 20
-    gliderPitchUpSense = -20
-    gliderPitchDownSense = 20
+    gliderPitchUpSense = 20
+    gliderPitchDownSense = -20
     
     glider = FlightControls()
     glider.setAileronOne(0)
@@ -133,6 +133,7 @@ def main():
         # [7] = Pitch
 
         gpsArray = readArduino()
+        gpsArray[3] = 20.111222
         #for value in gpsArray:
         #    print(value)
         #print(gpsArray[6])
@@ -155,19 +156,20 @@ def main():
         #accelerateFile.write(toWrite)
         try:
             #if glider is pitching down, raise ailerons
-            if float(gpsArray[7]) > gliderPitchDownSense:
+            if float(gpsArray[7]) < gliderPitchDownSense:
                 glider.setAileronOne(aileronOneUp)
                 glider.setAileronTwo(aileronTwoUp)
                 
-                print("Pitching Down")
+                #print("Pitching Down")
+                
                 
                 #accelerateFile.write("Pitching Down\n")
             #if glider is pitching up, lower ailerons
-            elif float(gpsArray[7]) < gliderPitchUpSense:
+            elif float(gpsArray[7]) > gliderPitchUpSense:
                 glider.setAileronOne(aileronOneDown)
                 glider.setAileronTwo(aileronTwoDown)
                 
-                print("Pitching Up")
+                #print("Pitching Up")
                 
                 #accelerateFile.write("Pitching Up\n")
             #if glider is rolling right, raise left aileron
@@ -175,7 +177,7 @@ def main():
                 glider.setAileronOne(aileronOneUp)
                 glider.setAileronTwo(aileronTwoDown)
                 
-                print("Rolling Right")
+                #print("Rolling Right")
                 #print(gpsArray[0])
                 #accelerateFile.write("Rolling Right\n")
             #if glider is rolling left, raise right aileron
@@ -183,7 +185,9 @@ def main():
                 glider.setAileronOne(aileronOneDown)
                 glider.setAileronTwo(aileronTwoUp)
                 
-                print("Rolling Left")
+                #print("Rolling Left")
+                print(gpsArray[6])
+                #sleep(1)
                 
                 #accelerateFile.write("Rolling Left\n")
             else:
@@ -191,6 +195,48 @@ def main():
                 glider.setAileronOne(0)
                 glider.setAileronTwo(0)
                 #print("intended state")
+                
+                #check intended vs current heading to determine left or right or neutral
+                
+                #intended (340) - current(20)
+                headingDifference = float(gpsArray[2]) - float(gpsArray[3])
+                
+                #print("intended:")
+                #print(gpsArray[2])
+                #sleep(1)
+                #print("current:")
+                #print(gpsArray[3])
+                #sleep(1)
+                #print("headingDifference:")
+                #print(headingDifference)
+                #sleep(1)
+                
+                if headingDifference > 10:
+                    if headingDifference < 180:
+                        #turn right
+                        gliderRollLeftSense = -10
+                        gliderRollRightSense = -40
+                    else:
+                        #turn left
+                        gliderRollLeftSense = 40
+                        gliderRollRightSense = 10
+                elif headingDifference < -10:
+                    if headingDifference > -180:
+                        #turn left
+                        gliderRollLeftSense = 40
+                        gliderRollRightSense = 10
+                    else:
+                        #turn right
+                        gliderRollLeftSense = -10
+                        gliderRollRightSense = -40
+                else:
+                    #straight
+                    gliderRollLeftSense = 20
+                    gliderRollRightSense = -20
+                    
+                #if need to turn left, change to have gliderRollLeftSense increased by ?20? and decreased gliderRollRightSense by ?20?                
+                #if need to turn right, change to have gliderRollLeftSense decreased by ?20? and increased gliderRollRightSense by ?20?                
+                #if need to fly straight, set default values for senses
         except:
             print("Bad Read..")
             #accelerateFile.write("Bad Read...\n")
