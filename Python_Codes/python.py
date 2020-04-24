@@ -38,7 +38,7 @@ def readArduino():
             else:
                 break
 
-        if count > 6:
+        if count > 7:
             gpsArrayInitialized = True
             break
         
@@ -64,7 +64,7 @@ def readArduino():
         
         indOfX = -1
         
-        for i in range(0,7):
+        for i in range(0,8):
             indOfX = plainGPS.find(termsArray[i])
             if indOfX > 0:
                 gpsArray[i] = parseArduino(indOfX, plainGPS)
@@ -135,6 +135,8 @@ def main():
         gpsArray = readArduino()
         #for value in gpsArray:
         #    print(value)
+        #print(gpsArray[6])
+        #print(gpsArray[7])
 
         
         #print(glider.aileronAngle)
@@ -153,7 +155,7 @@ def main():
         #accelerateFile.write(toWrite)
         try:
             #if glider is pitching down, raise ailerons
-            if float(gpsArray[1]) > gliderPitchDownSense:
+            if float(gpsArray[7]) > gliderPitchDownSense:
                 glider.setAileronOne(aileronOneUp)
                 glider.setAileronTwo(aileronTwoUp)
                 
@@ -161,7 +163,7 @@ def main():
                 
                 #accelerateFile.write("Pitching Down\n")
             #if glider is pitching up, lower ailerons
-            elif float(gpsArray[1]) < gliderPitchUpSense:
+            elif float(gpsArray[7]) < gliderPitchUpSense:
                 glider.setAileronOne(aileronOneDown)
                 glider.setAileronTwo(aileronTwoDown)
                 
@@ -169,7 +171,7 @@ def main():
                 
                 #accelerateFile.write("Pitching Up\n")
             #if glider is rolling right, raise left aileron
-            elif float(gpsArray[0]) < gliderRollRightSense:
+            elif float(gpsArray[6]) < gliderRollRightSense:
                 glider.setAileronOne(aileronOneUp)
                 glider.setAileronTwo(aileronTwoDown)
                 
@@ -177,7 +179,7 @@ def main():
                 #print(gpsArray[0])
                 #accelerateFile.write("Rolling Right\n")
             #if glider is rolling left, raise right aileron
-            elif float(gpsArray[0]) > gliderRollLeftSense:
+            elif float(gpsArray[6]) > gliderRollLeftSense:
                 glider.setAileronOne(aileronOneDown)
                 glider.setAileronTwo(aileronTwoUp)
                 
@@ -188,7 +190,7 @@ def main():
             #if glider is in intended state, flatten ailerons.
                 glider.setAileronOne(0)
                 glider.setAileronTwo(0)
-                print("intended state")
+                #print("intended state")
         except:
             print("Bad Read..")
             #accelerateFile.write("Bad Read...\n")
