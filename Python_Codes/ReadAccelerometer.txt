@@ -1,0 +1,89 @@
+ROLL: 1.90
+PITCH: 1.10
+
+ROLL: -22.00
+PITCH: 0.50
+
+ROLL: -47.10
+PITCH: -1.80
+Rolling Left
+
+ROLL: -71.20
+PITCH: -13.00
+Rolling Left
+
+ROLL: -71.20
+PITCH: -15.20
+Rolling Left
+
+ROLL: -68.00
+PITCH: -12.50
+Rolling Left
+
+ROLL: -39.80
+PITCH: -3.30
+Rolling Left
+
+ROLL: -5.00
+PITCH: 0.90
+
+ROLL: 21.50
+PITCH: 0.00
+
+ROLL: 51.80
+PITCH: -2.80
+Rolling Right
+
+ROLL: 60.10
+PITCH: -0.80
+Rolling Right
+
+ROLL: 57.00
+PITCH: -0.80
+Rolling Right
+
+ROLL: 29.40
+PITCH: -5.70
+
+ROLL: 0.40
+PITCH: -0.40
+
+ROLL: 2.00
+PITCH: 16.00
+
+ROLL: 1.40
+PITCH: 49.30
+Pitching Down
+
+ROLL: 0.50
+PITCH: 63.00
+Pitching Down
+
+ROLL: 4.80
+PITCH: 58.80
+Pitching Down
+
+ROLL: 0.00
+PITCH: 29.50
+
+ROLL: -0.20
+PITCH: 1.90
+
+ROLL: 2.60
+PITCH: -28.40
+
+ROLL: -6.90
+PITCH: -51.20
+Pitching Up
+
+ROLL: -7.90
+PITCH: -50.30
+Pitching Up
+
+ROLL: -3.50
+PITCH: -38.20
+Pitching Up
+
+ROLL: 4.80
+PITCH: -6.10
+
